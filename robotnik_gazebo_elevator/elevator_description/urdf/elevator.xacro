@@ -1,0 +1,288 @@
+<?xml version="1.0"?>
+<!-- Elevator -->
+<robot name="elevator" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--Properties-constants-->
+  <xacro:property name="floor_mass" value="100"/>
+  <xacro:property name="floor_dx" value="2.91"/>
+  <xacro:property name="floor_dy" value="1.8"/>
+  <xacro:property name="floor_dz" value="0.001"/>
+  
+  <xacro:property name="wall_thickness" value="0.1"/>
+  <xacro:property name="wall_height" value="2.5"/>
+  <xacro:property name="wall_rightdoor_width" value="0.4625"/>
+  <xacro:property name="wall_leftdoor_width" value="0.375"/>
+  
+  <xacro:property name="door_mass" value="50"/>
+  <xacro:property name="door_dx" value="0.1"/>
+  <xacro:property name="door_dy" value="${floor_dy-wall_rightdoor_width-wall_leftdoor_width}"/>
+  <xacro:property name="door_dz" value="2.5"/>
+  
+  <xacro:property name="roof_length" value="1"/>
+  <xacro:property name="roof_height" value="0.6"/>
+  
+  <!--Include gazebo ros_control plugin-->
+  <xacro:include filename="$(find elevator_description)/urdf/elevator.gazebo" />
+  
+  <!--Links (world, elevatorcab_link, doorleft_link, doorright_link)-->
+  <link name="world"/>
+
+  <link name="elevatorcab_link">
+
+    <collision name="floor_collision">
+	  <geometry>
+	    <box size="${floor_dx} ${floor_dy} ${floor_dz}"/>
+	  </geometry>
+    </collision>
+    <visual name="floor_visual">
+	  <geometry>
+	    <box size="${floor_dx} ${floor_dy} ${floor_dz}"/>
+	  </geometry>
+    </visual>
+	
+    <!-- wall1 is the wall to the right of the door, when facing 
+    the door-->
+    <collision name="wall1_collision">
+      <origin xyz="${floor_dx/2-wall_thickness/2} ${floor_dy/2-wall_rightdoor_width/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${wall_rightdoor_width} ${wall_height}"/>
+      </geometry> 
+    </collision>
+    <visual name="wall1_visual">
+      <origin xyz="${floor_dx/2-wall_thickness/2} ${floor_dy/2-wall_rightdoor_width/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${wall_rightdoor_width} ${wall_height}"/>
+      </geometry>
+    </visual>
+
+    <!-- wall2 is the wall to the left of the door, when facing 
+    the door-->
+    <collision name="wall2_collision">
+      <origin xyz="${floor_dx/2-wall_thickness/2} ${-floor_dy/2+wall_leftdoor_width/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${wall_leftdoor_width} ${wall_height}"/>
+      </geometry>
+    </collision>
+    <visual name="wall2_visual">
+      <origin xyz="${floor_dx/2-wall_thickness/2} ${-floor_dy/2+wall_leftdoor_width/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${wall_leftdoor_width} ${wall_height}"/>
+      </geometry>
+    </visual>
+
+    <!-- wall3 is the wall on the left side of the elevator, when 
+    facing the door-->
+    <collision name="wall3_collision">
+      <origin xyz="0 -${floor_dy/2-wall_thickness/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${floor_dx} ${wall_thickness} ${wall_height}"/>
+      </geometry>
+    </collision>
+    <visual name="wall3_visual">
+      <origin xyz="0 -${floor_dy/2-wall_thickness/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${floor_dx} ${wall_thickness} ${wall_height}"/>
+      </geometry>
+    </visual>
+
+    <!-- wall4 is the wall at the back of the elevator, when facing 
+    the door-->
+    <collision name="wall4_collision">
+      <origin xyz="${-floor_dx/2+wall_thickness/2} 0 ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${floor_dy} ${wall_height}"/>
+      </geometry>
+    </collision>
+    <visual name="wall4_visual">
+      <origin xyz="${-floor_dx/2+wall_thickness/2} 0 ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${wall_thickness} ${floor_dy} ${wall_height}"/>
+      </geometry>
+    </visual>
+
+    <!-- wall5 is the wall on the right side of the elevator, when 
+    facing the door-->
+    <collision name="wall5_collision">
+      <origin xyz="0 ${floor_dy/2-wall_thickness/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${floor_dx} ${wall_thickness} ${wall_height}"/>
+      </geometry>
+    </collision>
+    <visual name="wall5_visual">
+      <origin xyz="0 ${floor_dy/2-wall_thickness/2} ${wall_height/2}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${floor_dx} ${wall_thickness} ${wall_height}"/>
+      </geometry>
+    </visual>
+    
+    <collision name="roof_collision">
+      <origin xyz="${-floor_dx/2+wall_thickness+roof_length/2} 0 ${roof_height}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${roof_length} ${floor_dy-2*wall_thickness} ${wall_thickness}"/>
+      </geometry>
+    </collision>
+    <visual name="roof_visual">
+      <origin xyz="${-floor_dx/2+wall_thickness+roof_length/2} 0 ${roof_height}" rpy="0 0 0"/>
+      <geometry>
+	    <box size="${roof_length} ${floor_dy-2*wall_thickness} ${wall_thickness}"/>
+      </geometry>
+    </visual>
+    
+    <inertial>
+	    <mass value ="${floor_mass}"/>
+	    <inertia
+	    ixx="${floor_mass / 12.0 * (floor_dy*floor_dy + 0.5*0.5)}" ixy="0.0" ixz="0.0"
+	    iyy="${floor_mass / 12.0 * (floor_dx*floor_dx + 0.5*0.5)}" iyz="0.0"
+	    izz="${floor_mass / 12.0 * (floor_dx*floor_dx + floor_dy*floor_dy)}"/>
+    </inertial>
+  </link>
+
+  <!--Door splitted in two links (doorleft_link, door_right) to be able 
+  to open it with the building walls-->
+  <link name="doorleft_link">
+    <collision name="doorleft_collision">
+      <geometry>
+	    <box size="${door_dx} ${door_dy/2} ${door_dz}"/>
+      </geometry>
+    </collision>
+
+    <visual name="doorleft_visual">
+      <geometry>
+	    <box size="${door_dx} ${door_dy/2} ${door_dz}"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="${door_mass/2}"/>
+      <inertia
+      ixx="${door_mass/2 / 12.0 * (door_dy*door_dy + door_dz*door_dz)}" ixy="0.0" ixz="0.0"
+      iyy="${door_mass/2 / 12.0 * (door_dx*door_dx + door_dz*door_dz)}" iyz="0.0"
+      izz="${door_mass/2 / 12.0 * (door_dx*door_dx + door_dy*door_dy)}"/>
+    </inertial>
+  </link>
+  
+  <link name="doorright_link">
+    <collision name="doorright_collision">
+      <geometry>
+	    <box size="${door_dx} ${door_dy/2} ${door_dz}"/>
+      </geometry>
+    </collision>
+
+    <visual name="doorright_visual">
+      <geometry>
+	    <box size="${door_dx} ${door_dy/2} ${door_dz}"/>
+      </geometry>
+    </visual>
+
+    <inertial>
+      <mass value="${door_mass/2}"/>
+      <inertia
+      ixx="${door_mass/2 / 12.0 * (door_dy*door_dy + door_dz*door_dz)}" ixy="0.0" ixz="0.0"
+      iyy="${door_mass/2 / 12.0 * (door_dx*door_dx + door_dz*door_dz)}" iyz="0.0"
+      izz="${door_mass/2 / 12.0 * (door_dx*door_dx + door_dy*door_dy)}"/>
+    </inertial>
+  </link>
+  
+  <link name="floorextension_link">
+    <collision name="floorextension_collision">
+      <geometry>
+	    <box size="0.2 0.95 ${floor_dz}"/>
+      </geometry>
+    </collision>
+    <visual name="floorextension_visual">
+      <geometry>
+	    <box size="0.2 0.95 ${floor_dz}"/>
+      </geometry>
+    </visual>
+    
+    <inertial>
+      <mass value="50"/>
+      <inertia
+      ixx="${50 / 12.0 * (0.95*0.95 + floor_dz*floor_dz)}" ixy="0.0" ixz="0.0"
+      iyy="${50 / 12.0 * (0.2*0.2 + floor_dz*floor_dz)}" iyz="0.0"
+      izz="${50 / 12.0 * (0.2*0.2 + 0.95*0.95)}"/>
+    </inertial>
+  </link>
+  
+
+  <!--Joint (elevatorcab_joint, doorleft_joint, doorright_joint)-->
+  <joint name="elevatorcab_joint" type="prismatic">
+    <parent link="world"/>
+    <child link="elevatorcab_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="800.0"/>
+    <limit effort="50000" velocity="20" lower="0" upper="150"/>
+  </joint>
+
+  <joint name="doorleft_joint" type="prismatic">
+    <parent link="elevatorcab_link"/>
+    <child link="doorleft_link"/>
+    <origin xyz="${floor_dx/2-door_dx/2} ${floor_dy/2-wall_rightdoor_width-3*door_dy/4} ${door_dz/2+0.0001}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="10" lower="0" upper="0.94375"/>
+  </joint>
+  
+  <joint name="doorright_joint" type="prismatic">
+    <parent link="elevatorcab_link"/>
+    <child link="doorright_link"/>
+    <origin xyz="${floor_dx/2-door_dx/2} ${floor_dy/2-wall_rightdoor_width-door_dy/4} ${door_dz/2+0.0001}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="100" velocity="10" lower="0" upper="0.4625"/>
+  </joint>
+  
+  <joint name="floorextension_joint" type="prismatic">
+    <parent link="elevatorcab_link"/>
+    <child link="floorextension_link"/>
+    <origin xyz="${floor_dx/2+0.1} ${floor_dy/2-wall_rightdoor_width-door_dy/2} ${-floor_dz/2}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10000" velocity="100" lower="-0.2" upper="0"/>
+  </joint>
+  
+
+  <!--Transmission (elevatorcab_transmission, doorleft_transmission, doorright_transmission)-->
+  <transmission name="elevatorcab_transmission"> 
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="elevatorcab_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="elevatorcab_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="doorleft_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="doorleft_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="doorleft_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="doorright_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="doorright_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="doorright_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <transmission name="floorextension_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="floorextension_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="floorextension_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+</robot>

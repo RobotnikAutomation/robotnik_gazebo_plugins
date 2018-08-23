@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>elevator_description</name>
+  <version>0.0.0</version>
+  <description>The elevator_description package</description>
+
+  <maintainer email="turtlebot@todo.todo">turtlebot</maintainer>
+
+
+  <license>BSD</license>
+
+
+ 
+  <!--   <doc_depend>doxygen</doc_depend> -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
+  
+  <export>
+  </export>
+</package>

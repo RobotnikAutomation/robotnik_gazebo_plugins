@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robotnik_gazebo_elevator</name>
+  <version>0.0.0</version>
+  <description>The robotnik_gazebo_elevator package</description>
+
+  <maintainer email="asoriano@robotnik.es">Angel Soriano</maintainer>
+  <maintainer email="avillena@robotnik.es">Álvaro Villena</maintainer>
+  <maintainer email="dredo@robotnik.es">David Redó</maintainer>
+  <maintainer email="aarnal@robotnik.es">Alejandro Arnal</maintainer>
+  <maintainer email="mbosch@robotnik.es">Marc Bosch</maintainer>
+  <maintainer email="rnavarro@robotnik.es">Román Navarro</maintainer>
+
+  <license>BSD</license>
+
+  <url type="repository">https://github.com/RobotnikAutomation/robotnik_gazebo_plugins.git</url>
+  <url type="bugtracker">https://github.com/RobotnikAutomation/robotnik_gazebo_plugins/issues</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <exec_depend>elevator_gazebo</exec_depend>
+  <exec_depend>elevator_control</exec_depend>
+  <exec_depend>elevator_description</exec_depend>
+  <exec_depend>elevator_node</exec_depend>
+
+  <export><metapackage/></export>
+</package>

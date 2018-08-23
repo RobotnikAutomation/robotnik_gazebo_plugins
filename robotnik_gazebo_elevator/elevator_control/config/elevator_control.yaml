@@ -1,0 +1,24 @@
+elevator:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+  
+  # Position Controllers ---------------------------------------
+  elevatorcab_joint_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: elevatorcab_joint
+    pid: {p: 100000.0, i: 0.01, d: 10000.0}
+  doorleft_joint_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: doorleft_joint
+    pid: {p: 2000.0, i: 0.01, d: 360.0}
+  doorright_joint_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: doorright_joint
+    pid: {p: 2000.0, i: 0.01, d: 360.0}
+  floorextension_joint_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: floorextension_joint
+    pid: {p: 2000.0, i: 0.01, d: 360.0}
+  
