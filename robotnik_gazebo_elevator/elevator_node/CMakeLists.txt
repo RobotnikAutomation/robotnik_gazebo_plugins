@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(elevator_node)
 
+add_compile_options(-std=c++11)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   genmsg
   message_generation
+  robotnik_elevator_interface_msgs
+  robotnik_elevator_component
 )
 
 ## Generate messages in the 'msg' folder
@@ -43,5 +47,5 @@ include_directories(
 )
 
 add_executable(elevator_node src/elevator_node.cpp)
-target_link_libraries(elevator_node ${catkin_LIBRARIES})
+target_link_libraries(elevator_node robotnik_elevator_component ${catkin_LIBRARIES})
 add_dependencies(elevator_node elevator_node_generate_messages_cpp)
