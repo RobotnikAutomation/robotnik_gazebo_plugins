@@ -8282,7 +8282,7 @@
             <size>26.04 2 0.001</size>
           </box>
         </geometry>
-        <transparency>0</transparency>
+        <transparency>0.8</transparency>
       </visual>
       <pose frame=''>16.6846 -27.1452 0 0 0 -1.0129</pose>
     </link>
@@ -8303,7 +8303,7 @@
             <size>26.04 2 0.001</size>
           </box>
         </geometry>
-        <transparency>0</transparency>
+        <transparency>0.8</transparency>
       </visual>
       <pose frame=''>1.3521 -2.5770 0 0 0 -1.0129</pose>
     </link>
@@ -8324,7 +8324,7 @@
             <size>35 55 0.001</size>
           </box>
         </geometry>
-        <transparency>0</transparency>
+        <transparency>0.8</transparency>
       </visual>
       <pose frame=''>-6.6761 -24.6557 0 0 0 0.5579</pose>
     </link>
@@ -8345,7 +8345,7 @@
             <size>35 55 0.001</size>
           </box>
         </geometry>
-        <transparency>0</transparency>
+        <transparency>0.8</transparency>
       </visual>
       <pose frame=''>24.7128 -5.0665 0 0 0 0.5579</pose>
     </link>
