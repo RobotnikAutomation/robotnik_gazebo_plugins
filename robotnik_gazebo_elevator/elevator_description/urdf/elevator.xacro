@@ -114,20 +114,7 @@
 	    <box size="${floor_dx} ${wall_thickness} ${wall_height}"/>
       </geometry>
     </visual>
-    
-    <collision name="roof_collision">
-      <origin xyz="${-floor_dx/2+wall_thickness+roof_length/2} 0 ${roof_height}" rpy="0 0 0"/>
-      <geometry>
-	    <box size="${roof_length} ${floor_dy-2*wall_thickness} ${wall_thickness}"/>
-      </geometry>
-    </collision>
-    <visual name="roof_visual">
-      <origin xyz="${-floor_dx/2+wall_thickness+roof_length/2} 0 ${roof_height}" rpy="0 0 0"/>
-      <geometry>
-	    <box size="${roof_length} ${floor_dy-2*wall_thickness} ${wall_thickness}"/>
-      </geometry>
-    </visual>
-    
+       
     <inertial>
 	    <mass value ="${floor_mass}"/>
 	    <inertia
@@ -212,7 +199,7 @@
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
     <dynamics damping="800.0"/>
-    <limit effort="50000" velocity="20" lower="0" upper="150"/>
+    <limit effort="25000" velocity="1.0" lower="0" upper="150"/>
   </joint>
 
   <joint name="doorleft_joint" type="prismatic">
@@ -220,7 +207,7 @@
     <child link="doorleft_link"/>
     <origin xyz="${floor_dx/2-door_dx/2} ${floor_dy/2-wall_rightdoor_width-3*door_dy/4} ${door_dz/2+0.0001}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit effort="100" velocity="10" lower="0" upper="0.94375"/>
+    <limit effort="50" velocity="5.0" lower="0" upper="0.94375"/>
   </joint>
   
   <joint name="doorright_joint" type="prismatic">
@@ -228,7 +215,7 @@
     <child link="doorright_link"/>
     <origin xyz="${floor_dx/2-door_dx/2} ${floor_dy/2-wall_rightdoor_width-door_dy/4} ${door_dz/2+0.0001}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit effort="100" velocity="10" lower="0" upper="0.4625"/>
+    <limit effort="50" velocity="5.0" lower="0" upper="0.4625"/>
   </joint>
   
   <joint name="floorextension_joint" type="prismatic">
