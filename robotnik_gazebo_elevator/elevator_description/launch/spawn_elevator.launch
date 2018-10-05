@@ -1,4 +1,4 @@
-<!-- spawn_elevator.launch -->
+<?xml version="1.0"?>
 <launch>
   <!-- Elevator pose -->
   <arg name="x" default="0"/>

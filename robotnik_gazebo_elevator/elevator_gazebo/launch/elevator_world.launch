@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->
@@ -47,18 +48,20 @@
 	</include> 
 
   <!-- Load the URDF into the ROS Parameter Server -->
-  <include file="$(find elevator_description)/launch/spawn_elevator.launch">
-    <arg name="x" value="9.0184"/>
-    <arg name="y" value="-14.8611"/>
-    <arg name="yaw" value="-1.0128583268"/>
-  </include>
-  <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot >
-  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
-    args="-urdf -model elevator -param robot_description"/-->
+  <group ns="elevator">
+	  <include file="$(find elevator_description)/launch/spawn_elevator.launch">
+		<arg name="x" value="9.0184"/>
+		<arg name="y" value="-14.8611"/>
+		<arg name="yaw" value="-1.0128583268"/>
+	  </include>
+	  <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot >
+	  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+		args="-urdf -model elevator -param robot_description"/-->
 
-  <!-- ros_control elevator launch file -->
-  <include file="$(find elevator_control)/launch/elevator_control.launch" />
-  
-  <node name="elevator_node" pkg="elevator_node" type="elevator_node" output="screen">
-  </node>
+	  <!-- ros_control elevator launch file -->
+	  <include file="$(find elevator_control)/launch/elevator_control.launch" />
+	  
+	  <node name="elevator_node" pkg="elevator_node" type="elevator_node" output="screen">
+	  </node>
+  </group>
 </launch>
