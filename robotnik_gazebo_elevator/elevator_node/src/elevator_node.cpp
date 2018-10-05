@@ -20,6 +20,7 @@ public:
 	height_actual = height=0.0;
 	floor_height_=10.0;
 	elevator_cab_joint_name_="elevatorcab_joint";
+	elevator_goto_step = 0;
   }
 
   virtual ~RobotnikGazeboElevatorNode()
@@ -62,6 +63,9 @@ protected:
 	ros::Subscriber sub_elevatorcab;
 	
 	std::string elevator_cab_joint_name_;
+	
+	int elevator_goto_step;
+	ros::Time elevator_goto_step_timer;
   
 public:
   
@@ -87,6 +91,7 @@ public:
 	void standbyState(){
 		switchToState(robotnik_msgs::State::READY_STATE);
 		switchToElevatorStatus(robotnik_elevator_interface_msgs::ElevatorState::ELEVATOR_STATUS_IDLE);
+		switchToDoorStatus(robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_CLOSE);	
 	}
   
 	int takeElevatorControl(){
@@ -99,44 +104,6 @@ public:
 
 	int goToFloor(int floor){
 		
-		
-		std_msgs::Float64 floorextensionmsg;
-		std_msgs::Float64 elevatorcabmsg;
-
-		floorextensionmsg.data=-0.2;
-		
-		
-		pub_floorextension.publish(floorextensionmsg);
-
-		if(height!=0.0){
-			elevatorcabmsg.data=height-0.1;
-			pub_elevatorcab.publish(elevatorcabmsg);
-			ros::Duration(0.5).sleep(); // sleep for 0.5 seconds
-		}
-
-		height=floor*floor_height_;
-		RCOMPONENT_INFO("height=%lf",height);
-		elevatorcabmsg.data=height-0.2;
-		pub_elevatorcab.publish(elevatorcabmsg);
-		
-		while (abs(height-height_actual)>0.4){
-			RCOMPONENT_INFO_THROTTLE(2,"target = %lf, current = %lf",height, height_actual);
-			ros::spinOnce();
-		}  
-
-		floorextensionmsg.data=0;
-		elevatorcabmsg.data=height;
-		
-		if (height!=0){
-			elevatorcabmsg.data+=0.1;
-			floorextensionmsg.data=0;
-		}
-		
-		pub_floorextension.publish(floorextensionmsg);
-		ros::Duration(0.3).sleep(); // sleep for 0.5 seconds
-		pub_elevatorcab.publish(elevatorcabmsg);
-	
-		elevator_state.current_floor = floor;
 		elevator_state.target_floor = floor;
   
 		return 0;
@@ -154,7 +121,7 @@ public:
 		pub_doorleft.publish(doorleftmsg);
 		pub_doorright.publish(doorrightmsg);
   
-		elevator_state.door_status = robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_OPEN;
+		switchToDoorStatus(robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_OPEN);
 		return 0;
 	}
 
@@ -168,13 +135,82 @@ public:
 		pub_doorleft.publish(doorleftmsg);
 		pub_doorright.publish(doorrightmsg);
 		
-		elevator_state.door_status = robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_CLOSE;		
+		switchToDoorStatus(robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_CLOSE);		
 		
 		return 0;
 	}
 	
 	void readyState(){
+		static std_msgs::Float64 floorextensionmsg;
+		static std_msgs::Float64 elevatorcabmsg;
 		
+		if(elevator_state.current_floor != elevator_state.target_floor){
+			
+			switch(elevator_goto_step){
+				case 0:
+					switchToElevatorStatus(robotnik_elevator_interface_msgs::ElevatorState::ELEVATOR_STATUS_MOVING);
+					floorextensionmsg.data=-0.2;
+					pub_floorextension.publish(floorextensionmsg);
+					elevator_goto_step = 1;
+					elevator_goto_step_timer == ros::Time::now();
+				break;
+				
+				case 1:
+					if((ros::Time::now() - elevator_goto_step_timer).toSec() >= 0.5){
+						if(height!=0.0){
+							elevatorcabmsg.data=height-0.1;
+							pub_elevatorcab.publish(elevatorcabmsg);
+						}
+						elevator_goto_step = 2;
+						elevator_goto_step_timer == ros::Time::now();
+					}
+				
+				break;
+				
+				case 2:	
+					height=elevator_state.target_floor*floor_height_;
+					RCOMPONENT_INFO("height=%lf",height);
+					elevatorcabmsg.data=height-0.2;
+					pub_elevatorcab.publish(elevatorcabmsg);
+					elevator_goto_step = 3;
+					elevator_goto_step_timer == ros::Time::now();
+				break;
+				
+				case 3:
+					if(abs(height-height_actual)<=0.4){
+						elevator_goto_step = 4;
+						elevator_goto_step_timer == ros::Time::now();
+					}else
+						RCOMPONENT_INFO_THROTTLE(2,"target = %lf, current = %lf",height, height_actual);
+				break;
+				
+				
+				case 4:
+					floorextensionmsg.data=0;
+					elevatorcabmsg.data=height;
+					
+					if (height!=0){
+						elevatorcabmsg.data+=0.1;
+						floorextensionmsg.data=0;
+					}
+					
+					pub_floorextension.publish(floorextensionmsg);
+					elevator_goto_step = 5;
+					elevator_goto_step_timer == ros::Time::now();
+					
+				break;
+			
+				case 5:
+					if((ros::Time::now() - elevator_goto_step_timer).toSec() >= 0.5){
+						pub_elevatorcab.publish(elevatorcabmsg);
+						elevator_state.current_floor = elevator_state.target_floor;
+						switchToElevatorStatus(robotnik_elevator_interface_msgs::ElevatorState::ELEVATOR_STATUS_IDLE);
+						elevator_goto_step = 0;
+					}
+				break;
+					
+			}
+		}
 		
 	}
 
