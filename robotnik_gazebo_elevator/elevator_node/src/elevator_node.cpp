@@ -18,7 +18,8 @@ public:
     : RobotnikElevatorComponent(h)
   {
 	height_actual = height=0.0;
-	floor_height=40.0;
+	floor_height_=10.0;
+	elevator_cab_joint_name_="elevatorcab_joint";
   }
 
   virtual ~RobotnikGazeboElevatorNode()
@@ -49,7 +50,7 @@ protected:
  
     double height_actual;
 	double height;
-	double floor_height;
+	double floor_height_;
 	
     // PUBLISHERS
 	ros::Publisher pub_elevatorcab; 
@@ -59,18 +60,28 @@ protected:
 	
 	// SUBSCRIBERS
 	ros::Subscriber sub_elevatorcab;
+	
+	std::string elevator_cab_joint_name_;
   
 public:
   
+    void rosReadParams(){
+		pnh_.param<std::string>("elevator_cab_joint_name", elevator_cab_joint_name_, elevator_cab_joint_name_);
+		pnh_.param("floor_height", floor_height_, floor_height_);
+
+		
+	}
+	
+	
     int rosSetup(){
 		RobotnikElevatorComponent::rosSetup();
 		
-		pub_elevatorcab=nh_.advertise<std_msgs::Float64>("elevator/elevatorcab_joint_position_controller/command",1, true);
-		pub_doorleft=nh_.advertise<std_msgs::Float64>("elevator/doorleft_joint_position_controller/command",1, true);
-		pub_doorright=nh_.advertise<std_msgs::Float64>("elevator/doorright_joint_position_controller/command",1, true);
-		pub_floorextension=nh_.advertise<std_msgs::Float64>("elevator/floorextension_joint_position_controller/command",1, true);
+		pub_elevatorcab=nh_.advertise<std_msgs::Float64>("elevatorcab_joint_position_controller/command",1, true);
+		pub_doorleft=nh_.advertise<std_msgs::Float64>("doorleft_joint_position_controller/command",1, true);
+		pub_doorright=nh_.advertise<std_msgs::Float64>("doorright_joint_position_controller/command",1, true);
+		pub_floorextension=nh_.advertise<std_msgs::Float64>("floorextension_joint_position_controller/command",1, true);
 
-		sub_elevatorcab = nh_.subscribe("elevator/joint_states", 10, &RobotnikGazeboElevatorNode::heightCallback, this);
+		sub_elevatorcab = nh_.subscribe("joint_states", 10, &RobotnikGazeboElevatorNode::heightCallback, this);
 	}
 	
 	void standbyState(){
@@ -103,8 +114,8 @@ public:
 			ros::Duration(0.5).sleep(); // sleep for 0.5 seconds
 		}
 
-		height=floor*floor_height;
-		//RCOMPONENT_INFO("height=%lf",height);
+		height=floor*floor_height_;
+		RCOMPONENT_INFO("height=%lf",height);
 		elevatorcabmsg.data=height-0.2;
 		pub_elevatorcab.publish(elevatorcabmsg);
 		
