@@ -22,10 +22,12 @@ The package contains the gazebo world and models. The simulation launch file is 
 
 <h1>Simulating elevator</h1>
 
-1. Install the following dependencies:
-  - rb1_base_common [link](https://github.com/RobotnikAutomation/rb1_base_common)
-  - robotnik_msgs [link](https://github.com/RobotnikAutomation/robotnik_msgs)
-  - robotnik_sensors [link](https://github.com/RobotnikAutomation/robotnik_sensors)
+1. To rund the demo, install the following dependencies:
+  - [rb1_base_common](https://github.com/RobotnikAutomation/rb1_base_common)
+  - [robotnik_msgs](https://github.com/RobotnikAutomation/robotnik_msgs)
+  - [robotnik_sensors](https://github.com/RobotnikAutomation/robotnik_sensors)
+  - [robotnik_elevator_interface](https://github.com/RobotnikAutomation/robotnik_elevator_interface)
+  - [rcomponent](https://github.com/RobotnikAutomation/rcomponent)
 
     In the workspace install the packages dependencies:
     ```
@@ -33,22 +35,14 @@ The package contains the gazebo world and models. The simulation launch file is 
     ```  
   - Copy the "$(find elevator_gazebo)/models" in your gazebo models folder
 
-2. Launch elevator simulation :
+2. Launch elevator simulation:
 
   roslaunch elevator_gazebo elevator_world.launch
 
 
-<h1>Services</h1>
+<h1>Topics & Services</h1>
 
-- rosservice call /get_control: displays that the control of the elevator has been taken by the user
-
-- rosservice call /set_door open: open the doors of the elevator
-
--     "        "      "     close: close the doors of the elevator
-
-- rosservice call /go_to_floor n: lifts the elevator to the nth floor (which height is the nth multiple of the parameter floor_height - see parameters hereunder)
-
-- rosservice call /release_control: displays that the control of the elevator has been released by the user
+- See [robotnik_elevator_component](https://github.com/RobotnikAutomation/robotnik_elevator_interface/tree/master/robotnik_elevator_component).
 
 
 <h1>Parameters</h1>
@@ -68,6 +62,8 @@ The package contains the gazebo world and models. The simulation launch file is 
 	<include file="$(find elevator_control)/launch/elevator_control.launch" />
 	
 	<node name="elevator_node" pkg="elevator_node" type="elevator_node" output="screen">
+	    <param name="elevator_id" value="elevator"/>
+	    <param name="floor_height" value="40.0"/>
 	</node>
   2. Replace the 6 pose arguments by the desired initial pose of the elevator 
 
