@@ -130,7 +130,7 @@ namespace gazebo
     /// \brief for setting ROS name space
     private: std::string robot_namespace_;
 
-    private: ros::CallbackQueue p3d_queue_;
+    private: ros::CallbackQueue ground_truth_odom_queue_;
     private: void QueueThread();
     private: boost::thread callback_queue_thread_;
 

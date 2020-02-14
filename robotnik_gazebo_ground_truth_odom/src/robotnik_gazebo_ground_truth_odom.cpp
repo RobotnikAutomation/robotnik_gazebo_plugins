@@ -39,8 +39,8 @@ RobotnikGazeboGroundTruthOdom::~RobotnikGazeboGroundTruthOdom()
   this->update_connection_.reset();
   // Finalize the controller
   this->rosnode_->shutdown();
-  this->p3d_queue_.clear();
-  this->p3d_queue_.disable();
+  this->ground_truth_odom_queue_.clear();
+  this->ground_truth_odom_queue_.disable();
   this->callback_queue_thread_.join();
   delete this->rosnode_;
 }
@@ -62,7 +62,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("bodyName"))
   {
-    ROS_FATAL_NAMED("p3d", "p3d plugin missing <bodyName>, cannot proceed");
+    ROS_FATAL_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <bodyName>, cannot proceed");
     return;
   }
   else
@@ -71,14 +71,14 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL_NAMED("p3d", "gazebo_ros_p3d plugin error: bodyName: %s does not exist\n",
+    ROS_FATAL_NAMED("ground_truth_odom", "gazebo_ros_ground_truth_odom plugin error: bodyName: %s does not exist\n",
       this->link_name_.c_str());
     return;
   }
 
   if (!_sdf->HasElement("topicName"))
   {
-    ROS_FATAL_NAMED("p3d", "p3d plugin missing <topicName>, cannot proceed");
+    ROS_FATAL_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <topicName>, cannot proceed");
     return;
   }
   else
@@ -86,7 +86,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("worldBodyName"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <worldBodyName>, defaults to world");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <worldBodyName>, defaults to world");
     this->world_body_name_ = "world";
   }
   else
@@ -94,7 +94,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("frameName"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <frameName>, defaults to <bodyName>");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <frameName>, defaults to <bodyName>");
     this->frame_name_ = this->link_name_;
   }
   else
@@ -102,7 +102,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("worldFrameName"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <worldFrameName>, defaults to <worldBodyName>");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <worldFrameName>, defaults to <worldBodyName>");
     this->world_frame_name_ = this->world_body_name_;
   }
   else
@@ -110,7 +110,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
   
   if (!_sdf->HasElement("broadcastTF"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <broadcastTF>, defaults to false");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <broadcastTF>, defaults to false");
     this->broadcastTF_ = false;
   }
   else
@@ -118,7 +118,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("xyzOffset"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <xyzOffset>, defaults to 0s");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <xyzOffset>, defaults to 0s");
     this->offset_.Pos() = ignition::math::Vector3d(0, 0, 0);
   }
   else
@@ -126,7 +126,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("rpyOffset"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <rpyOffset>, defaults to 0s");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <rpyOffset>, defaults to 0s");
     this->offset_.Rot() = ignition::math::Quaterniond(ignition::math::Vector3d(0, 0, 0));
   }
   else
@@ -134,7 +134,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("gaussianNoise"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <gaussianNoise>, defaults to 0.0");
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <gaussianNoise>, defaults to 0.0");
     this->gaussian_noise_ = 0;
   }
   else
@@ -142,7 +142,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
 
   if (!_sdf->HasElement("updateRate"))
   {
-    ROS_DEBUG_NAMED("p3d", "p3d plugin missing <updateRate>, defaults to 0.0"
+    ROS_DEBUG_NAMED("ground_truth_odom", "ground_truth_odom plugin missing <updateRate>, defaults to 0.0"
              " (as fast as possible)");
     this->update_rate_ = 0;
   }
@@ -152,7 +152,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM_NAMED("p3d", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
+    ROS_FATAL_STREAM_NAMED("ground_truth_odom", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
   }
@@ -201,7 +201,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
     this->reference_link_ = this->model_->GetLink(this->world_body_name_);
     if (!this->reference_link_)
     {
-      ROS_ERROR_NAMED("p3d", "gazebo_ros_p3d plugin: worldBodyName: %s does not exist, will"
+      ROS_ERROR_NAMED("ground_truth_odom", "gazebo_ros_ground_truth_odom plugin: worldBodyName: %s does not exist, will"
                 " not publish pose\n", this->world_body_name_.c_str());
       return;
     }
@@ -210,7 +210,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
   // init reference frame state
   if (this->reference_link_)
   {
-    ROS_DEBUG_NAMED("p3d", "got body %s", this->reference_link_->GetName().c_str());
+    ROS_DEBUG_NAMED("ground_truth_odom", "got body %s", this->reference_link_->GetName().c_str());
     this->frame_apos_ = 0;
     this->frame_aeul_ = 0;
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -223,7 +223,7 @@ void RobotnikGazeboGroundTruthOdom::Load(physics::ModelPtr _parent, sdf::Element
   }
 
 
-  // start custom queue for p3d
+  // start custom queue for ground_truth_odom
   this->callback_queue_thread_ = boost::thread(
     boost::bind(&RobotnikGazeboGroundTruthOdom::QueueThread, this));
 
@@ -249,7 +249,7 @@ void RobotnikGazeboGroundTruthOdom::UpdateChild()
 
   if (cur_time < this->last_time_)
   {
-      ROS_WARN_NAMED("p3d", "Negative update time difference detected.");
+      ROS_WARN_NAMED("ground_truth_odom", "Negative update time difference detected.");
       this->last_time_ = cur_time;
   }
 
@@ -444,7 +444,7 @@ void RobotnikGazeboGroundTruthOdom::QueueThread()
 
   while (this->rosnode_->ok())
   {
-    this->p3d_queue_.callAvailable(ros::WallDuration(timeout));
+    this->ground_truth_odom_queue_.callAvailable(ros::WallDuration(timeout));
   }
 }
 }
