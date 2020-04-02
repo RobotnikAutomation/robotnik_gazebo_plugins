@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   robotnik_elevator_interface_msgs
   robotnik_elevator_component
+  rcomponent
 )
 
 ## Generate messages in the 'msg' folder
@@ -47,5 +48,5 @@ include_directories(
 )
 
 add_executable(elevator_node src/elevator_node.cpp)
-target_link_libraries(elevator_node robotnik_elevator_component ${catkin_LIBRARIES})
+target_link_libraries(elevator_node ${catkin_LIBRARIES})
 add_dependencies(elevator_node elevator_node_generate_messages_cpp)
