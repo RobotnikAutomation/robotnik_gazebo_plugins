@@ -18,7 +18,7 @@ The package includes also a launch file to spawn the elevator at a desired pose.
 
 <h2>elevator_gazebo</h2>
 
-The package contains the gazebo world and models. The simulation launch file is included in this package.
+The package contains the gazebo world. The simulation launch file is included in this package.
 
 <h1>Simulating elevator</h1>
 
@@ -28,6 +28,7 @@ The package contains the gazebo world and models. The simulation launch file is 
   - [robotnik_sensors](https://github.com/RobotnikAutomation/robotnik_sensors)
   - [robotnik_elevator_interface](https://github.com/RobotnikAutomation/robotnik_elevator_interface)
   - [rcomponent](https://github.com/RobotnikAutomation/rcomponent)
+  - [robotnik_gazebo_models](https://github.com/RobotnikAutomation/robotnik_gazebo_models)
 
     In the workspace install the packages dependencies:
     ```
