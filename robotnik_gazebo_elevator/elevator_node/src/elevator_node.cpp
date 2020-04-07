@@ -6,7 +6,6 @@
 
 #include <robotnik_elevator_component/robotnik_elevator_component.h>
 
-using namespace robotnik_elevator_component;
 
 
 class RobotnikGazeboElevatorNode : public RobotnikElevatorComponent
