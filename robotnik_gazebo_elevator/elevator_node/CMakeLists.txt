@@ -50,3 +50,7 @@ include_directories(
 add_executable(elevator_node src/elevator_node.cpp)
 target_link_libraries(elevator_node ${catkin_LIBRARIES})
 add_dependencies(elevator_node elevator_node_generate_messages_cpp)
+
+add_executable(fake_physics_elevator_node src/fake_physics_elevator_node.cpp)
+target_link_libraries(fake_physics_elevator_node ${catkin_LIBRARIES})
+add_dependencies(fake_physics_elevator_node elevator_node_generate_messages_cpp)
