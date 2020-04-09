@@ -21,7 +21,7 @@ public:
     set_model_state_client_name_ = "/gazebo/set_model_state";
     x_ = 0.0;
     y_ = 0.0;
-    // yaw_ = 0.0;
+    yaw_ = 0.0;
 
     rosReadParams();
   }
@@ -45,12 +45,6 @@ public:
     pnh_.param("x", x_, x_);
     pnh_.param("y", y_, y_);
     pnh_.param("yaw", yaw_, yaw_);
-
-    // double yaw_def = 2.3;
-    // ros::param::get("/elevator/elevator_node/yaw", yaw_);
-    // readParam(pnh_, "yaw", yaw_, yaw_def);
-    // readParam(pnh_, "yaw", yaw_, yaw_);
-    ROS_WARN("yaaaaw is %f", yaw_);
   }
 
   int rosSetup(){
@@ -80,39 +74,16 @@ public:
 	}
 
 	int openDoor(){
-
-		// std_msgs::Float64 doorleftmsg;
-		// std_msgs::Float64 doorrightmsg;
-    //
-		// ROS_INFO("request: open the door");
-		// ROS_INFO("sending back response: opening");
-		// doorleftmsg.data=0.94375;
-		// doorrightmsg.data=0.4625;
-		// pub_doorleft.publish(doorleftmsg);
-		// pub_doorright.publish(doorrightmsg);
-
 		switchToDoorStatus(robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_OPEN);
 		return 0;
 	}
 
 	int closeDoor(){
-		// std_msgs::Float64 doorleftmsg;
-		// std_msgs::Float64 doorrightmsg;
-    //
-		// doorleftmsg.data=0.0;
-		// doorrightmsg.data=0.0;
-    //
-		// pub_doorleft.publish(doorleftmsg);
-		// pub_doorright.publish(doorrightmsg);
-
 		switchToDoorStatus(robotnik_elevator_interface_msgs::ElevatorState::DOOR_STATUS_CLOSE);
-
 		return 0;
 	}
 
 	void readyState(){
-
-    ROS_WARN("yaw is %f", yaw_);
 
 		if(elevator_state.current_floor != elevator_state.target_floor){
       switchToElevatorStatus(robotnik_elevator_interface_msgs::ElevatorState::ELEVATOR_STATUS_MOVING);
@@ -121,18 +92,14 @@ public:
       //Call service to set model pose
       elevator_state_msg.request.model_state.model_name = "elevator";
       elevator_state_msg.request.model_state.pose.position.z = elevator_state.target_floor * floor_height_;
-
       elevator_state_msg.request.model_state.pose.position.x = x_;
       elevator_state_msg.request.model_state.pose.position.y = y_;
 
-      ROS_WARN("yaw is: %f", yaw_);
       tf::Quaternion q;
       q.setRPY(0, 0, yaw_);
       geometry_msgs::Quaternion quaternion;
       tf::quaternionTFToMsg(q, quaternion);
       elevator_state_msg.request.model_state.pose.orientation = quaternion;
-
-      ROS_WARN("q.x = %f, q.y = %f, q.z = %f, q.w = %f", quaternion.x, quaternion.y, quaternion.z, quaternion.w);
 
       bool result = set_model_state_client_.call(elevator_state_msg);
       if (false == result)
