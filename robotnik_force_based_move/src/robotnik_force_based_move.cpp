@@ -215,6 +215,20 @@ namespace gazebo
   void RobotnikForceBasedMove::UpdateChildBegin()
   {
     boost::mutex::scoped_lock scoped_lock(lock);
+    if (odometry_rate_ > 0.0) {
+#if (GAZEBO_MAJOR_VERSION >= 8)
+      common::Time current_time = parent_->GetWorld()->SimTime();
+#else
+      common::Time current_time = parent_->GetWorld()->GetSimTime();
+#endif
+      double seconds_since_last_update = 
+        (current_time - last_odom_publish_time_).Double();
+      if (seconds_since_last_update > (1.0 / odometry_rate_)) {
+        publishOdometry(seconds_since_last_update);
+        last_odom_publish_time_ = current_time;
+      }
+    }
+
     if (ros::Time::now() - command_last_stamp_ > command_watchdog_)
     {
       return; 
@@ -259,20 +273,6 @@ namespace gazebo
     //      y_ * cosf(yaw) + x_ * sinf(yaw),
     //      0));
     //parent_->SetAngularVel(math::Vector3(0, 0, rot_));
-
-    if (odometry_rate_ > 0.0) {
-#if (GAZEBO_MAJOR_VERSION >= 8)
-      common::Time current_time = parent_->GetWorld()->SimTime();
-#else
-      common::Time current_time = parent_->GetWorld()->GetSimTime();
-#endif
-      double seconds_since_last_update = 
-        (current_time - last_odom_publish_time_).Double();
-      if (seconds_since_last_update > (1.0 / odometry_rate_)) {
-        publishOdometry(seconds_since_last_update);
-        last_odom_publish_time_ = current_time;
-      }
-    }
   }
 
   void RobotnikForceBasedMove::UpdateChildEnd()
