@@ -84,7 +84,7 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
   }
 
   //Reads and checks the existance of the link specified on the modelName label 
-  if (!_sdf->HasElement("visualName"))
+  /*if (!_sdf->HasElement("visualName"))
   {
     ROS_FATAL_NAMED("set_visual", "robotnik_gazebo_set_visual plugin missing <visualName>, cannot proceed");
     return;
@@ -93,6 +93,35 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
   {
     this->visual_name_ = _sdf->GetElement("visualName")->Get<std::string>();
     ROS_INFO_NAMED("set_visual", "robotnik_gazebo_set_visual plugin loaded for %s and visual %s", this->link_name_.c_str(), this->visual_name_.c_str());
+  }*/
+  
+  int i = 0;
+  if (_sdf->HasElement("visual"))
+  {
+    sdf::ElementPtr sdfVisual = _sdf->GetElement("visual");
+
+    while (sdfVisual)
+    {
+      std::string visual_sdf;
+      ROS_WARN("Has element %d", i);
+      // name
+      if (sdfVisual->HasElement("visualName"))
+      {
+        visual_sdf = sdfVisual->Get<std::string>("visualName");
+        i++;
+      }
+      else
+      {
+        ROS_ERROR_NAMED("set_visual","Parameter 'visualName' is missing in 'visual'.");
+      }
+      this->visuals_.push_back(visual_sdf);
+      sdfVisual = sdfVisual->GetNextElement("visual");
+    }
+  }
+  else
+  {
+    ROS_ERROR_NAMED("set_visual", "No visual tag found");
+    //return;
   }
 
   // Make sure the ROS node for Gazebo has already been initialized
@@ -101,6 +130,14 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
     ROS_FATAL_STREAM_NAMED("set_visual", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
       << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
     return;
+  }
+
+  physics::LinkPtr link_ = this->model_->GetLink(link_name_);
+  std::string scoped_name = link_->GetScopedName().c_str();
+
+  for(int i=0; i < visuals_.size(); i++)
+  {
+    scoped_visuals.push_back(scoped_name + "::" + visuals_[i]);
   }
 
   this->rosnode_ = new ros::NodeHandle(this->robot_namespace_);
@@ -151,11 +188,7 @@ void RobotnikGazeboSetVisual::OnUpdate()
 
 gazebo::msgs::Visual RobotnikGazeboSetVisual::SetColor()
 {
-  physics::LinkPtr link_ = this->model_->GetLink(link_name_);
-  std::string visual_link_name = link_->GetScopedName().c_str();
-  std::string visual_name = visual_link_name + "::robot_visual";
-
-  gazebo::msgs::Visual visualMsg = link_->GetVisualMessage(visual_name);
+  gazebo::msgs::Visual visualMsg = link_->GetVisualMessage(scoped_visuals[0]);
 
   visualMsg.set_name(link_->GetScopedName());
   //ROS_WARN("%s", link_->GetScopedName().c_str());
@@ -166,20 +199,20 @@ gazebo::msgs::Visual RobotnikGazeboSetVisual::SetColor()
   // Initiate material
   if ((!visualMsg.has_material()) || visualMsg.mutable_material() == NULL)
   {
-    ROS_ERROR_ONCE_NAMED("set_visual","modelName with scope :: visualName does ot contains material label, it can be due to the combination does not exists");
+    ROS_ERROR_NAMED("set_visual","%s does not contain material label, it can be due to the combination does not exist", link_->GetScopedName().c_str());
     gazebo::msgs::Material *materialMsg = new gazebo::msgs::Material;
     visualMsg.set_allocated_material(materialMsg);
   }
   else
   {
-    ROS_ERROR_ONCE_NAMED("set_visual", "modelName with scope :: visualName contains material label");
+    ROS_DEBUG_NAMED("set_visual", "%s contains material label", link_->GetScopedName().c_str());
   }
 
   
   // Set color
   // gazebo::msgs::Color is deprecated for Gazebo > 7  
 #if GAZEBO_MAJOR_VERSION >= 8
-  ignition::math::Color newColor(color.r, color.g, color.b, 1);
+  ignition::math::Color newColor(color.r, color.g, color.b, color.a);
 #else
   gazebo::msgs::Color newColor(r, g, b, a);
 #endif
@@ -200,46 +233,6 @@ gazebo::msgs::Visual RobotnikGazeboSetVisual::SetColor()
   //return;
   return visualMsg;  
 }
-
-/*bool RobotnikGazeboSetVisual::defineColors()
-{
-  if (_sdf->HasElement("color"))
-  {
-    sdf::ElementPtr sdfColor = _sdf->GetElement("color");
-    while (sdfColor)
-    {
-      auto color = std::make_shared<ColorRGBA>();
-      // name
-      if (sdfColor->HasElement("name"))
-      {
-        color->name = sdfBlock->Get<string>("name");
-      }
-      else
-      {
-        gzerr << "Parameter <name> is missing in a color." << std::endl;
-      }
-      // code
-      if (sdfBlock->HasElement("code"))
-      {
-        color->code = sdfBlock->Get<ignition::math::Color>("code");
-      }
-      else
-      {
-        color->code.Reset();
-      }
-
-      this->dataPtr->defined_colors_.push_back(color);
-      sdfColor = sdfColor->GetNextElement("color");
-    }
-  }
-  else
-  {
-    ROS_ERROR("set_visual", "No color tag found. It must be added manually.")
-    return false;
-  }
-
-  return true;
-}*/
 
 bool RobotnikGazeboSetVisual::setColorSrvCallback(gazebo_msgs::SetLightProperties::Request& request,
                                               gazebo_msgs::SetLightProperties::Response& response)

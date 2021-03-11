@@ -76,11 +76,8 @@ namespace gazebo
     
     protected: ignition::math::Color color_;
     protected: gazebo::msgs::Visual SetColor();
-  
-    protected: bool ReadColors();
-
-    public: std::vector< std::shared_ptr<ColorRGBA> > defined_colors_;
-
+    protected: bool readVisual();
+    protected: std::vector<std::string> visuals_;
     public: int currentBlockIndex;
 
     private: physics::WorldPtr world_;
@@ -146,6 +143,8 @@ namespace gazebo
     private: ros::ServiceServer set_color_srv_;
     private: bool setColorSrvCallback(gazebo_msgs::SetLightProperties::Request& request, gazebo_msgs::SetLightProperties::Response& response);
     private: std_msgs::ColorRGBA color;
+    std::vector<std::string> scoped_visuals;
+
   };
 }
 #endif
