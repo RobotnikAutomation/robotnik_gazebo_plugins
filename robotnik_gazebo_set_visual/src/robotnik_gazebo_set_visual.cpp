@@ -137,7 +137,7 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
   node_->Init(world_->Name()); //GetName()
   pub_visual_ = node_->Advertise<gazebo::msgs::Visual>("~/visual");
   this->updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(std::bind(&RobotnikGazeboSetVisual::OnUpdate, this));
-  set_color_srv_ = nh_.advertiseService("/set_visual_raquel", &RobotnikGazeboSetVisual::setColorSrvCallback, this);
+  set_color_srv_ = nh_.advertiseService("/robotnik_gazebo_set_visual/set_visual", &RobotnikGazeboSetVisual::setColorSrvCallback, this);
 }
 
 // Update the controller, virtual method
