@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_dev
   message_generation
   gazebo_msgs
+  gazebo_plugins
   roscpp
   rospy
   nodelet
@@ -76,6 +77,7 @@ catkin_package(
   CATKIN_DEPENDS
   message_runtime
   gazebo_msgs
+  gazebo_plugins
   roscpp
   rospy
   nodelet
