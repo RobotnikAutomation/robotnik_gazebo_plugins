@@ -54,11 +54,11 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
   if (_sdf->HasElement("robotNamespace"))
   {
     this->robot_namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
-    ROS_DEBUG_NAMED("set_visual", "robotnik_gazebo_set_visual robot_namespace: %s", this->robot_namespace_.c_str());
+    ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::Load robotnik_gazebo_set_visual robot_namespace: %s", this->robot_namespace_.c_str());
   }
   else
   {
-    ROS_DEBUG_NAMED("set_visual", "robotnik_gazebo_set_visual has no namespace");
+    ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::Load robotnik_gazebo_set_visual has no namespace");
   }
 
   //Reads and checks the existance of the link specified on the modelName label 
@@ -70,13 +70,13 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
   else
   {
     this->link_name_ = _sdf->GetElement("modelName")->Get<std::string>();
-    ROS_INFO_NAMED("set_visual", "robotnik_gazebo_set_visual plugin loaded for %s", this->link_name_.c_str());
+    ROS_INFO_NAMED("set_visual", "RobotnikGazeboSetVisual::Load robotnik_gazebo_set_visual plugin loaded for %s", this->link_name_.c_str());
   }
 
   this->link_ = _parent->GetLink(this->link_name_);
   if (!this->link_)
   {
-    ROS_FATAL_NAMED("set_visual", "robotnik_gazebo_set_visual plugin error: modelName: %s does not exist\n",
+    ROS_FATAL_NAMED("set_visual", "RobotnikGazeboSetVisual::Load robotnik_gazebo_set_visual plugin error: modelName: %s does not exist\n",
       this->link_name_.c_str());
     return;
   }
@@ -97,28 +97,27 @@ void RobotnikGazeboSetVisual::Load(physics::ModelPtr _parent, sdf::ElementPtr _s
       {
         visual_sdf = sdfVisual->Get<std::string>("visualName");
         i++;
-        ROS_DEBUG_NAMED("set_visual", "%d: %s readed", i, visual_sdf.c_str());
+        ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::Load %d: %s readed", i, visual_sdf.c_str());
       }
       else
       {
-        ROS_ERROR_NAMED("set_visual","Parameter 'visualName' is missing in 'visual'.");
+        ROS_ERROR_NAMED("set_visual","RobotnikGazeboSetVisual::Load Parameter 'visualName' is missing in 'visual'.");
       }
       this->visuals_.push_back(visual_sdf);
       sdfVisual = sdfVisual->GetNextElement("visual");
     }
-    ROS_DEBUG_NAMED("set_visual", "'visualName' readed succesfully!");
+    ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::Load 'visualName' readed succesfully!");
   }
   else
   {
-    ROS_ERROR_NAMED("set_visual", "No visual tag found");
+    ROS_ERROR_NAMED("set_visual", "RobotnikGazeboSetVisual::Load No visual tag found");
     //return;
   }
 
   // Make sure the ROS node for Gazebo has already been initialized
   if (!ros::isInitialized())
   {
-    ROS_FATAL_STREAM_NAMED("set_visual", "A ROS node for Gazebo has not been initialized, unable to load plugin. "
-      << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
+    ROS_FATAL_STREAM_NAMED("set_visual", "RobotnikGazeboSetVisual::Load Gazebo ROS node has not been initialized, unable to load plugin.");
     return;
   }
 
@@ -170,14 +169,13 @@ gazebo::msgs::Visual RobotnikGazeboSetVisual::SetColor()
     // Initiate material
     if ((!visualMsg.has_material()) || visualMsg.mutable_material() == NULL)
     {
-      ROS_ERROR_NAMED("set_visual","%s does not contain material label, maybe this visual is not defined on the urdf with a valid material tag.", link_->GetScopedName().c_str());
+      ROS_ERROR_NAMED("set_visual","RobotnikGazeboSetVisual::SetColor %s does not contain material label, check if it is defined in the urdf.", link_->GetScopedName().c_str());
       gazebo::msgs::Material *materialMsg = new gazebo::msgs::Material;
       visualMsg.set_allocated_material(materialMsg);
     }
     else
     {
-
-      ROS_DEBUG_NAMED("set_visual", "%s contains material label, creating the visualMsg", link_->GetScopedName().c_str());
+      ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::SetColor %s contains material label, creating the visualMsg", link_->GetScopedName().c_str());
   
     // Set color
     // gazebo::msgs::Color is deprecated for Gazebo > 7  
@@ -201,10 +199,19 @@ gazebo::msgs::Visual RobotnikGazeboSetVisual::SetColor()
       }
       materialMsg->set_allocated_diffuse(diffuseMsg);
     }
+    response_ = true;
+    status_ = visual_id_2change + " succesfully changed.";
   }
   else
   {
-    ROS_ERROR_NAMED("set_visual", "No matching visual. Did you forget to add %s as a visual on the plugin?", visual_id_2change.c_str());
+    ROS_ERROR_NAMED("set_visual", "RobotnikGazeboSetVisual::SetColor No matching visual. Did you forget to add %s as a visual in the plugin?", visual_id_2change.c_str());
+    response_ = false;
+    status_ = "No matching visual, visuals added in the plugin:";
+
+    for(int iter = 0; iter < visuals_.size(); iter++)
+    {
+      status_ = status_ + ", " + visuals_[iter];
+    }
   }
  
   return visualMsg;  
@@ -216,10 +223,11 @@ bool RobotnikGazeboSetVisual::setColorSrvCallback(gazebo_msgs::SetLightPropertie
   color = request.diffuse;
   visual_id_2change = request.light_name;
 
-  ROS_DEBUG_NAMED("set_visual", "Received a petition to change the color of %s to color.r: %f, color.g: %f, color.b: %f, color.a: %f", visual_id_2change.c_str(), color.r, color.g, color.b, color.a);
+  ROS_DEBUG_NAMED("set_visual", "RobotnikGazeboSetVisual::setColorSrvCallback Received a petition to change the color of %s to color.r: %f, color.g: %f, color.b: %f, color.a: %f", visual_id_2change.c_str(), color.r, color.g, color.b, color.a);
   
   pub_visual_->Publish(SetColor());
-  response.success = true;
+  response.success = response_;
+  response.status_message = status_;
   return true;
 }
 }

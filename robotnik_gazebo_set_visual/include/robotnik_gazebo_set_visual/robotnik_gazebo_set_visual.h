@@ -46,26 +46,38 @@ namespace gazebo
       bool setColorSrvCallback(gazebo_msgs::SetLightProperties::Request& request, gazebo_msgs::SetLightProperties::Response& response);
 
     private: 
+      ros::NodeHandle nh_;
+      ros::ServiceServer set_color_srv_;
+      
       std::vector<std::string> visuals_;
+      std::vector<std::string> scoped_visuals;
+
       physics::WorldPtr world_;
       physics::ModelPtr model_;
       physics::LinkPtr link_;
-      ros::NodeHandle* rosnode_;
-      std::string link_name_;
-      std::string visual_name_;
-      common::Time last_time_;
-      std::string robot_namespace_;
-      event::ConnectionPtr update_connection_;  // Pointer to the update event connection
-      unsigned int seed;
       gazebo::transport::NodePtr node_;
       gazebo::transport::PublisherPtr pub_visual_;
       gazebo::event::ConnectionPtr updateConnection;
-      float r,g,b,a;
-      ros::NodeHandle nh_;
-      ros::ServiceServer set_color_srv_;
-      std_msgs::ColorRGBA color;
-      std::vector<std::string> scoped_visuals;
+
+      ros::NodeHandle* rosnode_;
+
       std::string visual_id_2change;
+      std::string status_;
+      std::string link_name_;
+      std::string visual_name_;
+      std::string robot_namespace_;
+
+      common::Time last_time_;
+
+      event::ConnectionPtr update_connection_;  // Pointer to the update event connection
+      
+      unsigned int seed;
+      
+      float r,g,b,a;
+
+      std_msgs::ColorRGBA color;
+
+      bool response_;
   };
 }
 #endif
